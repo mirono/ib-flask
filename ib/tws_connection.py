@@ -24,7 +24,7 @@ class TWSConnection(EClient, EWrapper):
         EWrapper.__init__(self)
         EClient.__init__(self, self)
         self.connected = False
-        self.request_id = 1
+        self.request_id = 0
         self.socketio = socketio
         self.price_data = price_data
 
@@ -63,10 +63,10 @@ class TWSConnection(EClient, EWrapper):
         """Handle errors from IB API"""
         self.logger.error(f"Error {errorCode}: {errorString}")
 
-    @iswrapper
-    def nextValidId(self, order_id: int):
-        self.logger.info(f"Next valid request id: {order_id}")
-        self.request_id = order_id
+    # @iswrapper
+    # def nextValidId(self, order_id: int):
+    #     self.logger.info(f"Next valid request id: {order_id}")
+    #     self.request_id = order_id
 
     def next_request_id(self):
         self.request_id += 1

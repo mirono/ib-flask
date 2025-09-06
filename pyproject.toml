@@ -13,4 +13,8 @@ dependencies = [
     "python-socketio==5.9.0",
     "eventlet==0.33.3",
     "python-engineio==4.7.1",
+    "streamlit>=1.49.1",
+    "streamlit-lightweight-charts>=0.7.20",
+    "yfinance>=0.2.65",
+    "pandas-ta>=0.4.67b0",
 ]
