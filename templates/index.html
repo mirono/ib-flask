@@ -399,6 +399,11 @@
             updateLogger(logs);
         });
 
+        socket.on("connection_status", function(status) {
+            const data = status["status"];
+            updateConnectionStatus(data === "connected");
+        });
+
         // Functions
         function connectToTWS() {
             const host = document.getElementById('host').value;
@@ -410,13 +415,13 @@
                 body: JSON.stringify({ host, port })
             })
             .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    updateConnectionStatus(true);
-                } else {
-                    alert('Failed to connect to TWS');
-                }
-            })
+            //.then(data => {
+            //    if (data.success) {
+            //        updateConnectionStatus(true);
+            //    } else {
+            //        alert('Failed to connect to TWS');
+            //    }
+            //})
             .catch(error => {
                 console.error('Error:', error);
                 alert('Connection error');

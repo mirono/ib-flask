@@ -10,10 +10,7 @@ import time
 # IB API imports
 from ibapi.client import EClient
 from ibapi.wrapper import EWrapper
-from ib import IBClient, IBWrapper
 from ibapi.ticktype import TickType, TickTypeEnum
-
-from ib import IBWrapper
 
 current_symbol = "AAPL"
 
@@ -24,8 +21,6 @@ class TWSConnection(EClient, EWrapper):
     def __init__(self, logger, log_messages, socketio, price_data):
         self.logger = logger
         self.log_messages = log_messages
-        # self.wrapper = IBWrapper(logger, log_messages, socketio, price_data)
-        # self.client = IBClient(self.wrapper)
         EWrapper.__init__(self)
         EClient.__init__(self, self)
         self.connected = False
@@ -35,36 +30,15 @@ class TWSConnection(EClient, EWrapper):
 
     def start_connect(self, host='127.0.0.1', port=4002, client_id=1):
         """Connect to TWS"""
+        self.logger.info(f"Connecting to TWS at {host}:{port} ...")
         try:
             self.connect(host, port, client_id)
-
             # Start the socket in a separate thread
             api_thread = threading.Thread(target=self.run_loop, daemon=True)
             api_thread.start()
 
-            # Wait for connection
-            time.sleep(2)
-
-            if self.isConnected():
-                self.connected = True
-                self.logger.info(f"Connected to TWS at {host}:{port}")
-                # self.log_messages.append({
-                #     'timestamp': datetime.now().strftime('%H:%M:%S'),
-                #     'level': 'INFO',
-                #     'message': f'Connected to TWS at {host}:{port}'
-                # })
-                return True
-            else:
-                raise Exception("Failed to connect to TWS")
-
         except Exception as e:
-            # error_msg = f"Connection error: {str(e)}"
             self.logger.error(f"Connection error: {str(e)}")
-            # self.log_messages.append({
-            #     'timestamp': datetime.now().strftime('%H:%M:%S'),
-            #     'level': 'ERROR',
-            #     'message': error_msg
-            # })
             return False
 
     def run_loop(self):
@@ -77,28 +51,17 @@ class TWSConnection(EClient, EWrapper):
             self.disconnect()
             self.connected = False
             self.logger.info("Disconnected from TWS")
-            # self.log_messages.append({
-            #     'timestamp': datetime.now().strftime('%H:%M:%S'),
-            #     'level': 'INFO',
-            #     'message': 'Disconnected from TWS'
-            # })
 
     @iswrapper
     def connectAck(self):
-        self.logger.info(f"{time.time()} Connected")
+        self.connected = True
+        self.logger.info("Connected to TWS")
+        self.socketio.emit('connection_status', {'status': 'connected'})
 
     @iswrapper
     def error(self, reqId, errorCode, errorString, advancedOrderRejectJson=""):
         """Handle errors from IB API"""
-        # error_msg = f"Error {errorCode}: {errorString}"
         self.logger.error(f"Error {errorCode}: {errorString}")
-        # self.log_messages.append({
-        #     'timestamp': datetime.now().strftime('%H:%M:%S'),
-        #     'level': 'ERROR',
-        #     'message': error_msg
-        # })
-        # self.socketio.emit('log_update', list(self.log_messages))
-
 
     @iswrapper
     def nextValidId(self, order_id: int):
@@ -126,12 +89,6 @@ class TWSConnection(EClient, EWrapper):
         self.reqMktData(request_id, contract, "", False, False, [])
 
         self.logger.info(f"Requested market data for {symbol}")
-        # self.log_messages.append({
-        #     'timestamp': datetime.now().strftime('%H:%M:%S'),
-        #     'level': 'INFO',
-        #     'message': f'Requesting market data for {symbol}'
-        # })
-
         return True
 
     def cancel_market_data(self, req_id=1):
@@ -139,11 +96,6 @@ class TWSConnection(EClient, EWrapper):
         if self.connected:
             self.cancelMktData(req_id)
             self.logger.info(f"Cancelled market data request for {current_symbol}")
-            # self.log_messages.append({
-            #     'timestamp': datetime.now().strftime('%H:%M:%S'),
-            #     'level': 'INFO',
-            #     'message': 'Cancelled market data request'
-            # })
 
     @iswrapper
     def tickPrice(self, reqId, tickType, price, attrib):
@@ -167,13 +119,6 @@ class TWSConnection(EClient, EWrapper):
             })
 
             self.logger.info(f"Price update for {current_symbol}: ${price:.2f}")
-            # log_msg = f"Price update for {current_symbol}: ${price:.2f}"
-            # self.log_messages.append({
-            #     'timestamp': timestamp.strftime('%H:%M:%S'),
-            #     'level': 'INFO',
-            #     'message': log_msg
-            # })
-            # self.socketio.emit('log_update', list(self.log_messages))
 
     @iswrapper
     def tickSize(self, reqId, tickType, size):
@@ -181,11 +126,4 @@ class TWSConnection(EClient, EWrapper):
         # if TickTypeEnum.  (tickType) == TickTypeEnum.VOLUME:
         if tickType == 8: # TickTypeEnum.VOLUME
             self.logger.info(f"Volume update: {size}")
-            # log_msg = f"Volume update: {size}"
-            # self.log_messages.append({
-            #     'timestamp': datetime.now().strftime('%H:%M:%S'),
-            #     'level': 'INFO',
-            #     'message': log_msg
-            # })
-            # self.socketio.emit('log_update', list(self.log_messages))
 

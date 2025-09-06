@@ -25,13 +25,6 @@ import json
 from collections import deque
 import pandas as pd
 
-# IB API imports
-from ibapi.client import EClient
-from ibapi.wrapper import EWrapper
-from ibapi.contract import Contract
-from ibapi.ticktype import TickType
-
-from ib import IBClient, IBWrapper
 from ib import TWSConnection
 
 
