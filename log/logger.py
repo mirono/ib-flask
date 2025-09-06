@@ -1,12 +1,12 @@
 import logging
 import time
-import datetime
+from datetime import datetime
 from logging.handlers import TimedRotatingFileHandler
 from collections import deque
 
 class Logger(logging.Logger):
 
-    def __init__(self, name):
+    def __init__(self, name, socketio):
         super().__init__(name)
         # self.logger = logging.getLogger(name)
         log_format = '%(message)s'
@@ -24,20 +24,23 @@ class Logger(logging.Logger):
         self.setLevel(logging.INFO)
 
         self.log_messages = deque(maxlen=100)  # Store last 100 log messages
+        self.socketio = socketio
 
-    # def info(self, msg, *args, **kwargs):
-    #     super().info(msg, args, kwargs)
-    #     self.log_messages.append({
-    #         'timestamp': datetime.now().strftime('%H:%M:%S'),
-    #         'level': 'INFO',
-    #         'message': f'{msg}'
-    #     })
-    #
-    # def error(self, msg, *args, **kwargs):
-    #     super().info(msg)
-    #     self.log_messages.append({
-    #         'timestamp': datetime.now().strftime('%H:%M:%S'),
-    #         'level': 'ERROR',
-    #         'message': f'{msg}'
-    #     })
-    #
+    def info(self, msg, *args, **kwargs):
+        super().info(msg, args, kwargs)
+        self.log_messages.append({
+            'timestamp': datetime.now().strftime('%H:%M:%S'),
+            'level': 'INFO',
+            'message': f'{msg}'
+        })
+        self.socketio.emit('log_update', list(self.log_messages))
+
+    def error(self, msg, *args, **kwargs):
+        super().info(msg)
+        self.log_messages.append({
+            'timestamp': datetime.now().strftime('%H:%M:%S'),
+            'level': 'ERROR',
+            'message': f'{msg}'
+        })
+        self.socketio.emit('log_update', list(self.log_messages))
+

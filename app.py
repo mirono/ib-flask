@@ -35,11 +35,11 @@ from ib import IBClient, IBWrapper
 from ib import TWSConnection
 
 
-logger = Logger(__name__)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 socketio = SocketIO(app, cors_allowed_origins="*")
+logger = Logger(__name__, socketio)
 
 # Global variables
 price_data = deque(maxlen=500)  # Store last 500 price points
@@ -115,11 +115,7 @@ def handle_connect():
 
 if __name__ == '__main__':
     # Add some initial log messages
-    log_messages.append({
-        'timestamp': datetime.now().strftime('%H:%M:%S'),
-        'level': 'INFO',
-        'message': 'Flask TWS application started'
-    })
+    logger.info("Flask TWS application started")
 
     # Start the Flask-SocketIO server with proper configuration
     try:
