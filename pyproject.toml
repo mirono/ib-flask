@@ -1,0 +1,16 @@
+[project]
+name = "ib-flask"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "flask>=3.1.2",
+    "flask-socketio==5.3.6",
+    "ibapi>=9.81.1.post1",
+    "pandas>=2.3.2",
+    "plotly>=6.3.0",
+    "python-socketio==5.9.0",
+    "eventlet==0.33.3",
+    "python-engineio==4.7.1",
+]
