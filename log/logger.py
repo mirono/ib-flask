@@ -44,3 +44,6 @@ class Logger(logging.Logger):
         })
         self.socketio.emit('log_update', list(self.log_messages))
 
+    def clear(self):
+        self.log_messages.clear()
+

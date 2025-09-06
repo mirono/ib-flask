@@ -565,6 +565,10 @@
 
         function clearLogs() {
             document.getElementById('loggerContent').innerHTML = '';
+            fetch('/log/clear', {
+                method: 'POST'
+            });
+
         }
 
         // Check connection status on page load

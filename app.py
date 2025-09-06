@@ -19,7 +19,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_socketio import SocketIO, emit
 import threading
 import time
-from log import logger_config, Logger
+from log import Logger
 from datetime import datetime
 import json
 from collections import deque
@@ -93,6 +93,11 @@ def status():
         'symbol': current_symbol,
         'data_points': len(price_data)
     })
+
+@app.route('/log/clear', methods=['POST'])
+def clear_logs():
+    logger.clear()
+    return "", 202
 
 @socketio.on('connect')
 def handle_connect():
