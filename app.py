@@ -61,13 +61,13 @@ def connect_tws():
     host = data.get('host', '127.0.0.1')
     port = data.get('port', 4002)
 
-    success = tws.connect(host, port)
+    success = tws.start_connect(host, port)
     return jsonify({'success': success, 'connected': tws.connected})
 
 @app.route('/disconnect', methods=['POST'])
 def disconnect_tws():
     """Disconnect from TWS API"""
-    tws.disconnect()
+    tws.start_disconnect()
     return jsonify({'success': True, 'connected': tws.connected})
 
 @app.route('/subscribe', methods=['POST'])

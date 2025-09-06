@@ -8,31 +8,32 @@ import threading
 import time
 
 # IB API imports
-#from ibapi.client import EClient
+from ibapi.client import EClient
 #from ibapi.wrapper import EWrapper
 from ib import IBClient, IBWrapper
 
 from ib import IBWrapper
 
 
-class TWSConnection:
+class TWSConnection(EClient):
     """Manages TWS connection and data requests"""
 
     def __init__(self, logger, log_messages, socketio, price_data):
         self.logger = logger
         self.log_messages = log_messages
         self.wrapper = IBWrapper(logger, log_messages, socketio, price_data)
-        self.client = IBClient(self.wrapper)
+        # self.client = IBClient(self.wrapper)
+        EClient.__init__(self, self.wrapper)
         # EWrapper.__init__(self)
         # EClient.__init__(self, self)
         self.connected = False
         self.request_id = 1
         self.socketio = socketio
 
-    def connect(self, host='127.0.0.1', port=4002, client_id=1):
+    def start_connect(self, host='127.0.0.1', port=4002, client_id=1):
         """Connect to TWS"""
         try:
-            self.client.connect(host, port, client_id)
+            self.connect(host, port, client_id)
 
             # Start the socket in a separate thread
             api_thread = threading.Thread(target=self.run_loop, daemon=True)
@@ -41,7 +42,7 @@ class TWSConnection:
             # Wait for connection
             time.sleep(2)
 
-            if self.client.isConnected():
+            if self.isConnected():
                 self.connected = True
                 self.log_messages.append({
                     'timestamp': datetime.now().strftime('%H:%M:%S'),
@@ -64,12 +65,12 @@ class TWSConnection:
 
     def run_loop(self):
         """Run the IB API message loop"""
-        self.client.run()
+        self.run()
 
-    def disconnect(self):
+    def start_disconnect(self):
         """Disconnect from TWS"""
         if self.connected:
-            self.client.disconnect()
+            self.disconnect()
             self.connected = False
             self.log_messages.append({
                 'timestamp': datetime.now().strftime('%H:%M:%S'),
@@ -117,7 +118,7 @@ class TWSConnection:
 
         # Request market data
         request_id = self.next_request_id()
-        self.client.reqMktData(request_id, contract, "", False, False, [])
+        self.reqMktData(request_id, contract, "", False, False, [])
 
         self.log_messages.append({
             'timestamp': datetime.now().strftime('%H:%M:%S'),
@@ -130,7 +131,7 @@ class TWSConnection:
     def cancel_market_data(self, req_id=1):
         """Cancel market data request"""
         if self.connected:
-            self.client.cancelMktData(req_id)
+            self.cancelMktData(req_id)
             self.log_messages.append({
                 'timestamp': datetime.now().strftime('%H:%M:%S'),
                 'level': 'INFO',
