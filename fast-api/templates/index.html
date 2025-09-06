@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+  <h1>Task Manager</h1>
+  <form hx-post="/add" hx-target="#tasks" hx-swap="outerHTML">
+    <input type="text" name="title" placeholder="New Task" required>
+    <button type="submit">Add</button>
+  </form>
+
+<div id="tasks">
+    {% include "tasks.html" %}
+  </div>
+</body>
+</html>
